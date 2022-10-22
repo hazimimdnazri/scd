@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./
+      dockerfile: api.Dockerfile
+    container_name: docker-api
+    restart: unless-stopped
+    working_dir: /var/www/api
+    volumes:
+      - ./api:/var/www/api
+    networks:
+      - app-network
+  
+  app:
+    build:
+      context: ./
+      dockerfile: app.Dockerfile
+    container_name: docker-app
+    restart: unless-stopped
+    working_dir: /var/www/app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/usr/src/app
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:1.19-alpine
+    container_name: docker-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
